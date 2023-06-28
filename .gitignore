@@ -33,3 +33,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+lang-sys-firebase-adminsdk-a3fz8-0ab2d1af40.json
+.env
