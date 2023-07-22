@@ -1,30 +1,35 @@
 'use client';
-import { auth } from '@/lib/firebase-config';
-import { signInWithEmailAndPassword } from '@firebase/auth';
+// https://nextjs.org/docs/app/api-reference/functions/use-router
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [value, setValue] = useState({ email: '', password: '' });
-
-  function signIn() {
-    signInWithEmailAndPassword(auth, value.email, value.password).then(
-      async (userCred) => {
-        fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${await userCred.user.getIdToken()}`,
-          },
-        }).then((response) => {
-          if (response.status === 200) {
-            router.push('/protected');
-          }
-        });
+  const signIn = async () => {
+    const body = JSON.stringify(value);
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+    if (response.status === 200) {
+      router.push('/protected');
+    } else {
+      const error = await response.json();
+      switch (error.message) {
+        case 'INVALID_EMAIL':
+        case 'EMAIL_NOT_FOUND':
+          console.log('メールアドレスが間違っています');
+          break;
+        case 'INVALID_PASSWORD':
+          console.log('パスワードが間違っています');
+          break;
+        default:
+          console.log(error.message);
       }
-    );
-  }
+    }
+  };
 
   return (
     <div className='flex min-h-screen items-center justify-center bg-slate-100'>
